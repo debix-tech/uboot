@@ -1,0 +1,67 @@
+From ad486a8da4be64ec210dce509eb64413395983ea Mon Sep 17 00:00:00 2001
+From: John_gao <9278978@qq.com>
+Date: Mon, 6 Jun 2022 11:06:00 +0000
+Subject: [PATCH] del dwc3 usb
+
+---
+ arch/arm/dts/imx8mp-evk.dts             | 6 ++++--
+ board/freescale/imx8mp_evk/imx8mp_evk.c | 2 +-
+ drivers/mmc/mmc.c                       | 2 +-
+ 3 files changed, 6 insertions(+), 4 deletions(-)
+ mode change 100644 => 100755 drivers/mmc/mmc.c
+
+diff --git a/arch/arm/dts/imx8mp-evk.dts b/arch/arm/dts/imx8mp-evk.dts
+index 3028cecdd1..05051a807e 100755
+--- a/arch/arm/dts/imx8mp-evk.dts
++++ b/arch/arm/dts/imx8mp-evk.dts
+@@ -444,7 +444,8 @@
+ 	adp-disable;
+ 	usb-role-switch;
+ //	role-switch-default-mode = "none";
+-	status = "okay";
++	//status = "okay";
++	status = "disabled";
+ #if 0
+ 	port {
+ 		usb3_drd_sw: endpoint {
+@@ -468,7 +469,8 @@
+ 	pinctrl-names = "default";
+ 	pinctrl-0 = <&pinctrl_usb1_vbus>;
+ 	dr_mode = "host";
+-	status = "okay";
++	//status = "okay";
++	status = "disabled";
+ };
+ 
+ &usdhc2 {
+diff --git a/board/freescale/imx8mp_evk/imx8mp_evk.c b/board/freescale/imx8mp_evk/imx8mp_evk.c
+index c719492990..a88667e740 100755
+--- a/board/freescale/imx8mp_evk/imx8mp_evk.c
++++ b/board/freescale/imx8mp_evk/imx8mp_evk.c
+@@ -115,7 +115,7 @@ int ft_board_setup(void *blob, struct bd_info *bd)
+ static iomux_v3_cfg_t const led_pads[] = {
+ 	MX8MP_PAD_NAND_READY_B__GPIO3_IO16 | MUX_PAD_CTRL(NO_PAD_CTRL),
+ };
+-static setup_led(void)
++static void setup_led(void)
+ {
+ 	imx_iomux_v3_setup_multiple_pads(led_pads,
+ 					 ARRAY_SIZE(led_pads));
+diff --git a/drivers/mmc/mmc.c b/drivers/mmc/mmc.c
+old mode 100644
+new mode 100755
+index 8347e5c28c..871d29cf98
+--- a/drivers/mmc/mmc.c
++++ b/drivers/mmc/mmc.c
+@@ -2854,7 +2854,7 @@ retry:
+ 
+ 		if (err) {
+ #if !defined(CONFIG_SPL_BUILD) || defined(CONFIG_SPL_LIBCOMMON_SUPPORT)
+-			pr_err("Card did not respond to voltage select! : %d\n", err);
++			//John_gao pr_err("Card did not respond to voltage select! : %d\n", err);
+ #endif
+ 			return -EOPNOTSUPP;
+ 		}
+-- 
+2.17.1
+

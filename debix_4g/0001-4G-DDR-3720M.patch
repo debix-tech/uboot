@@ -1,0 +1,124 @@
+From daf69c0a6efb36e90d5f750500d198d8857ef519 Mon Sep 17 00:00:00 2001
+From: John_gao <9278978@qq.com>
+Date: Tue, 26 Apr 2022 09:02:09 +0000
+Subject: [PATCH]  4G DDR 3720M
+
+---
+ board/freescale/imx8mp_evk/lpddr4_timing.c | 21 ++++++++++-----------
+ include/configs/imx8mp_evk.h               |  1 +
+ 2 files changed, 11 insertions(+), 11 deletions(-)
+
+diff --git a/board/freescale/imx8mp_evk/lpddr4_timing.c b/board/freescale/imx8mp_evk/lpddr4_timing.c
+index b543abfafd..9f188423e9 100755
+--- a/board/freescale/imx8mp_evk/lpddr4_timing.c
++++ b/board/freescale/imx8mp_evk/lpddr4_timing.c
+@@ -18,7 +18,7 @@ struct dram_cfg_param ddr_ddrc_cfg[] = {
+ 	/** Initialize DDRC registers **/
+ 	{ 0x3d400304, 0x1 },
+ 	{ 0x3d400030, 0x1 },
+-	{ 0x3d400000, 0xa1080020 },
++	{ 0x3d400000, 0xa3080020 },
+ 	{ 0x3d400020, 0x1323 },
+ 	{ 0x3d400024, 0x1c61a00 },
+ 	{ 0x3d400064, 0x710105 },
+@@ -55,7 +55,7 @@ struct dram_cfg_param ddr_ddrc_cfg[] = {
+ 	{ 0x3d4001c4, 0x1 },
+ 	{ 0x3d4000f4, 0xc99 },
+ 	{ 0x3d400108, 0x810191a },
+-	{ 0x3d400200, 0x1f },
++	{ 0x3d400200, 0x17 },
+ 	{ 0x3d40020c, 0x0 },
+ 	{ 0x3d400210, 0x1f1f },
+ 	{ 0x3d400204, 0x80808 },
+@@ -1069,7 +1069,7 @@ struct dram_cfg_param ddr_fsp0_cfg[] = {
+ 	{ 0x54009, 0xc8 },
+ 	{ 0x5400b, 0x2 },
+ 	{ 0x5400f, 0x100 },
+-	{ 0x54012, 0x110 },
++	{ 0x54012, 0x310 },
+ 	{ 0x54019, 0x36e4 },
+ 	{ 0x5401a, 0x33 },
+ 	{ 0x5401b, 0x4866 },
+@@ -1081,7 +1081,7 @@ struct dram_cfg_param ddr_fsp0_cfg[] = {
+ 	{ 0x54022, 0x4800 },
+ 	{ 0x54024, 0x16 },
+ 	{ 0x5402b, 0x1000 },
+-	{ 0x5402c, 0x1 },
++	{ 0x5402c, 0x3 },
+ 	{ 0x54032, 0xe400 },
+ 	{ 0x54033, 0x3336 },
+ 	{ 0x54034, 0x6600 },
+@@ -1110,7 +1110,7 @@ struct dram_cfg_param ddr_fsp1_cfg[] = {
+ 	{ 0x54009, 0xc8 },
+ 	{ 0x5400b, 0x2 },
+ 	{ 0x5400f, 0x100 },
+-	{ 0x54012, 0x110 },
++	{ 0x54012, 0x310 },
+ 	{ 0x54019, 0x84 },
+ 	{ 0x5401a, 0x33 },
+ 	{ 0x5401b, 0x4866 },
+@@ -1122,7 +1122,7 @@ struct dram_cfg_param ddr_fsp1_cfg[] = {
+ 	{ 0x54022, 0x4800 },
+ 	{ 0x54024, 0x16 },
+ 	{ 0x5402b, 0x1000 },
+-	{ 0x5402c, 0x1 },
++	{ 0x5402c, 0x3 },
+ 	{ 0x54032, 0x8400 },
+ 	{ 0x54033, 0x3300 },
+ 	{ 0x54034, 0x6600 },
+@@ -1151,7 +1151,7 @@ struct dram_cfg_param ddr_fsp2_cfg[] = {
+ 	{ 0x54009, 0xc8 },
+ 	{ 0x5400b, 0x2 },
+ 	{ 0x5400f, 0x100 },
+-	{ 0x54012, 0x110 },
++	{ 0x54012, 0x310 },
+ 	{ 0x54019, 0x84 },
+ 	{ 0x5401a, 0x33 },
+ 	{ 0x5401b, 0x4866 },
+@@ -1163,7 +1163,7 @@ struct dram_cfg_param ddr_fsp2_cfg[] = {
+ 	{ 0x54022, 0x4800 },
+ 	{ 0x54024, 0x16 },
+ 	{ 0x5402b, 0x1000 },
+-	{ 0x5402c, 0x1 },
++	{ 0x5402c, 0x3 },
+ 	{ 0x54032, 0x8400 },
+ 	{ 0x54033, 0x3300 },
+ 	{ 0x54034, 0x6600 },
+@@ -1192,7 +1192,7 @@ struct dram_cfg_param ddr_fsp0_2d_cfg[] = {
+ 	{ 0x5400b, 0x2 },
+ 	{ 0x5400f, 0x100 },
+ 	{ 0x54010, 0x1f7f },
+-	{ 0x54012, 0x110 },
++	{ 0x54012, 0x310 },
+ 	{ 0x54019, 0x36e4 },
+ 	{ 0x5401a, 0x33 },
+ 	{ 0x5401b, 0x4866 },
+@@ -1204,7 +1204,7 @@ struct dram_cfg_param ddr_fsp0_2d_cfg[] = {
+ 	{ 0x54022, 0x4800 },
+ 	{ 0x54024, 0x16 },
+ 	{ 0x5402b, 0x1000 },
+-	{ 0x5402c, 0x1 },
++	{ 0x5402c, 0x3 },
+ 	{ 0x54032, 0xe400 },
+ 	{ 0x54033, 0x3336 },
+ 	{ 0x54034, 0x6600 },
+@@ -1851,4 +1851,3 @@ struct dram_timing_info dram_timing = {
+ 	.fsp_table = { 3720, 400, 100, },
+ };
+ 
+-
+diff --git a/include/configs/imx8mp_evk.h b/include/configs/imx8mp_evk.h
+index d11ea3b5c6..ddbe9ed417 100644
+--- a/include/configs/imx8mp_evk.h
++++ b/include/configs/imx8mp_evk.h
+@@ -219,6 +219,7 @@
+ #define PHYS_SDRAM_2_SIZE		0x40000000	/* 1 GB */
+ #else
+ //#define PHYS_SDRAM_2_SIZE		0xC0000000	/* 3 GB */
++#define PHYS_SDRAM_2_SIZE		0x80000000	/* 3 GB */
+ #endif
+ 
+ #define CONFIG_MXC_UART_BASE		UART2_BASE_ADDR
+-- 
+2.17.1
+

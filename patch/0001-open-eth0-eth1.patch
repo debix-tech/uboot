@@ -1,0 +1,161 @@
+From fd7e0aa8fad0cb1534026e136f371d0395e18677 Mon Sep 17 00:00:00 2001
+From: John_gao <9278978@qq.com>
+Date: Wed, 11 May 2022 08:36:11 +0000
+Subject: [PATCH] open eth0 & eth1
+
+---
+ board/freescale/imx8mp_evk/imx8mp_evk.c | 122 +++++++++++++++++-------
+ 1 file changed, 86 insertions(+), 36 deletions(-)
+
+diff --git a/board/freescale/imx8mp_evk/imx8mp_evk.c b/board/freescale/imx8mp_evk/imx8mp_evk.c
+index f2826d3981..8f98d82d3b 100644
+--- a/board/freescale/imx8mp_evk/imx8mp_evk.c
++++ b/board/freescale/imx8mp_evk/imx8mp_evk.c
+@@ -111,6 +111,84 @@ int ft_board_setup(void *blob, struct bd_info *bd)
+ }
+ #endif
+ 
++#ifdef CONFIG_FEC_MXC
++#define FEC_RST_PAD IMX_GPIO_NR(4, 19)
++static iomux_v3_cfg_t const fec1_rst_pads[] = {
++	MX8MP_PAD_SAI1_TXD7__GPIO4_IO19 | MUX_PAD_CTRL(NO_PAD_CTRL),
++};
++
++
++static void setup_iomux_fec(void)
++{
++	imx_iomux_v3_setup_multiple_pads(fec1_rst_pads,
++					 ARRAY_SIZE(fec1_rst_pads));
++
++	gpio_request(FEC_RST_PAD, "fec1_rst");
++	gpio_direction_output(FEC_RST_PAD, 0);
++	mdelay(15);
++	gpio_direction_output(FEC_RST_PAD, 1);
++	mdelay(100);
++}
++
++static int setup_fec(void)
++{
++	struct iomuxc_gpr_base_regs *gpr =
++		(struct iomuxc_gpr_base_regs *)IOMUXC_GPR_BASE_ADDR;
++
++	setup_iomux_fec();
++
++	/* Enable RGMII TX clk output */
++	setbits_le32(&gpr->gpr[1], BIT(22));
++
++	//return set_clk_enet(ENET_125MHZ);
++	return 0;
++}
++#endif
++
++#ifdef CONFIG_DWC_ETH_QOS
++
++#define EQOS_RST_PAD IMX_GPIO_NR(4, 18)
++static iomux_v3_cfg_t const eqos_rst_pads[] = {
++	MX8MP_PAD_SAI1_TXD6__GPIO4_IO18 | MUX_PAD_CTRL(NO_PAD_CTRL),
++};
++
++static void setup_iomux_eqos(void)
++{
++	imx_iomux_v3_setup_multiple_pads(eqos_rst_pads,
++					 ARRAY_SIZE(eqos_rst_pads));
++
++	gpio_request(EQOS_RST_PAD, "eqos_rst");
++	gpio_direction_output(EQOS_RST_PAD, 0);
++	mdelay(15);
++	gpio_direction_output(EQOS_RST_PAD, 1);
++	mdelay(100);
++}
++
++static int setup_eqos(void)
++{
++	struct iomuxc_gpr_base_regs *gpr =
++		(struct iomuxc_gpr_base_regs *)IOMUXC_GPR_BASE_ADDR;
++
++	setup_iomux_eqos();
++
++	/* set INTF as RGMII, enable RGMII TXC clock */
++	clrsetbits_le32(&gpr->gpr[1],
++			IOMUXC_GPR_GPR1_GPR_ENET_QOS_INTF_SEL_MASK, BIT(16));
++	setbits_le32(&gpr->gpr[1], BIT(19) | BIT(21));
++
++	return set_clk_eqos(ENET_125MHZ);
++}
++#endif
++
++#if defined(CONFIG_FEC_MXC) || defined(CONFIG_DWC_ETH_QOS)
++int board_phy_config(struct phy_device *phydev)
++{
++	if (phydev->drv->config)
++		phydev->drv->config(phydev);
++	return 0;
++}
++#endif
++
+ #ifdef CONFIG_USB_TCPC
+ struct tcpc_port port1;
+ struct tcpc_port port2;
+@@ -398,37 +476,8 @@ int board_typec_get_mode(int index)
+ }
+ #endif
+ #endif
++ 
+ 
+-static void setup_fec(void)
+-{
+-	struct iomuxc_gpr_base_regs *gpr =
+-		(struct iomuxc_gpr_base_regs *)IOMUXC_GPR_BASE_ADDR;
+-
+-	/* Enable RGMII TX clk output */
+-	setbits_le32(&gpr->gpr[1], BIT(22));
+-}
+-
+-static int setup_eqos(void)
+-{
+-	struct iomuxc_gpr_base_regs *gpr =
+-		(struct iomuxc_gpr_base_regs *)IOMUXC_GPR_BASE_ADDR;
+-
+-	/* set INTF as RGMII, enable RGMII TXC clock */
+-	clrsetbits_le32(&gpr->gpr[1],
+-			IOMUXC_GPR_GPR1_GPR_ENET_QOS_INTF_SEL_MASK, BIT(16));
+-	setbits_le32(&gpr->gpr[1], BIT(19) | BIT(21));
+-
+-	return set_clk_eqos(ENET_125MHZ);
+-}
+-
+-#if CONFIG_IS_ENABLED(NET)
+-int board_phy_config(struct phy_device *phydev)
+-{
+-	if (phydev->drv->config)
+-		phydev->drv->config(phydev);
+-	return 0;
+-}
+-#endif
+ 
+ #define DISPMIX				13
+ #define MIPI				15
+@@ -445,13 +494,14 @@ int board_init(void)
+ 	imx8m_usb_power(1, true);
+ #endif
+ 
+-	if (CONFIG_IS_ENABLED(FEC_MXC)) {
+-		setup_fec();
+-	}
++#ifdef CONFIG_FEC_MXC
++	setup_fec();
++#endif
+ 
+-	if (CONFIG_IS_ENABLED(DWC_ETH_QOS)) {
+-		setup_eqos();
+-	}
++#ifdef CONFIG_DWC_ETH_QOS
++	/* clock, pin, gpr */
++	setup_eqos();
++#endif
+ 
+ #ifdef CONFIG_NAND_MXS
+ 	setup_gpmi_nand();
+-- 
+2.17.1
+
