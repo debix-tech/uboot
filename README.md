@@ -6,7 +6,7 @@
    
 ### Modify sources/meta-imx/meta-bsp/recipes-bsp/u-boot/u-boot-imx_2021.04.bb
     UBOOT_SRC ?= "git://github.com/debix-tech/uboot.git;protocol=https"
-    SRCREV = "1a87b972fac74699482e2dce2023b66358d8c4f5"
+    SRCREV = "2e3dc3a2f04e03176eda927e4602048cb4e9382d"
 
 ### Build yocto
     DISTRO=imx-desktop-xwayland MACHINE=imx8mpevk source imx-setup-desktop.sh -b debix-desktop
