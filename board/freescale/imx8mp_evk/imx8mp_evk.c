@@ -503,6 +503,61 @@ int board_phy_config(struct phy_device *phydev)
 #define DISPMIX				13
 #define MIPI				15
 
+
+//John_gao pca9535 
+static int setup_pca9535(uint8_t i2c_bus, uint8_t addr){
+	printf("start pca9535\n");
+	struct udevice *bus;
+	struct udevice *i2c_dev = NULL;
+	int ret;
+	uint8_t valb;
+	
+
+	ret = uclass_get_device_by_seq(UCLASS_I2C, i2c_bus, &bus);
+	if (ret) {
+		printf("%s: Can't find bus\n", __func__);
+		return -EINVAL;
+	}
+
+	ret = dm_i2c_probe(bus, addr, 0, &i2c_dev);
+	if (ret) {
+		printf("%s: Can't find device id=0x%x\n",
+			__func__, addr);
+		return -ENODEV;
+	}
+	valb = 0x0;
+	ret = dm_i2c_write(i2c_dev, 0x6, (const uint8_t *)&valb, 1);
+	if (ret) {
+		printf("%s dm_i2c_write 0x6(0xff) failed, err %d\n", __func__, ret);
+		return -EIO;
+	}
+	valb = 0x0;
+	ret = dm_i2c_write(i2c_dev, 0x7, (const uint8_t *)&valb, 1);
+	if (ret) {
+		printf("%s dm_i2c_write 0x7(0xff) failed, err %d\n", __func__, ret);
+		return -EIO;
+	}
+
+	valb = 0xff;
+	ret = dm_i2c_write(i2c_dev, 0x2, (const uint8_t *)&valb, 1);
+	if (ret) {
+		printf("%s dm_i2c_write 0x2(0xff) failed, err %d\n", __func__, ret);
+		return -EIO;
+	}
+	ret = dm_i2c_read(i2c_dev, 0x2, &valb, 1);
+	printf("addr(%d) reg(0x2) val(0x%x)\n", addr, valb);
+
+	valb = 0xff;
+	ret = dm_i2c_write(i2c_dev, 0x3, (const uint8_t *)&valb, 1);
+	if (ret) {
+		printf("%s dm_i2c_write 0x3(0xff) failed, err %d\n", __func__, ret);
+		return -EIO;
+	}
+
+	ret = dm_i2c_read(i2c_dev, 0x3, &valb, 1);
+	printf("addr(%d) reg(0x3) val(0x%x)\n", addr, valb);
+}
+
 int board_init(void)
 {
 	struct arm_smccc_res res;
@@ -515,6 +570,9 @@ int board_init(void)
 	imx8m_usb_power(0, true);
 	imx8m_usb_power(1, true);
 #endif
+//John_gao pca9535 
+setup_pca9535(3,0x20);
+//setup_pca9535(3,0x23);
 
 #ifdef CONFIG_FEC_MXC
 	setup_fec();
@@ -542,6 +600,95 @@ int board_init(void)
 	return 0;
 }
 
+//add by groot  
+bool is_hex_str(char *pdata,int data_len)
+{
+	int i = 0 ;
+	bool bret = true;
+	if(pdata == NULL || data_len <= 0)
+		return false;
+	
+	for(i = 0 ;i < data_len;i++){
+		if((pdata[i] >= '0' &&  pdata[i] <= '9') || \
+			(pdata[i] >= 'a' &&  pdata[i] <= 'f')|| \
+			(pdata[i] >= 'A' &&  pdata[i] <= 'F')){
+			continue;
+		}
+		bret = false;
+		break;
+	}
+	return bret;
+}
+
+bool format_to_eth_addr_str(char *mac_str,char *addr_buf)
+{
+	int i = 0;
+	int j =0;
+	for(i = 0;i < 12;i++){
+		addr_buf[j++] = mac_str[i];
+		if((i%2) &&(i != 11))
+			addr_buf[j++] = ':';
+	}
+}
+static int read_i2c_mac_addr(uint8_t i2c_bus, uint8_t addr,uint8_t *eth0_addr,uint8_t *eth1_addr)
+{
+	int ret;
+	struct udevice *i2c_dev = NULL;
+	struct udevice *bus;
+	ret = uclass_get_device_by_seq(UCLASS_I2C, i2c_bus, &bus);
+	if (ret) {
+		printf("%s: Can't find bus\n", __func__);
+		return -EINVAL;
+	}
+
+	ret = dm_i2c_probe(bus, addr, 0, &i2c_dev);
+	if (ret) {
+		printf("%s: Can't find device id=0x%x\n",
+			__func__, addr);
+		return -ENODEV;
+	}
+	// eth0 mac save at eeprom 12 offset
+	ret = dm_i2c_read(i2c_dev, 12, eth0_addr, 12);
+	// eth1 mac save at eeprom 0 offset
+	ret = dm_i2c_read(i2c_dev, 0, eth1_addr, 12);
+	return ret;
+}
+
+static int set_mac_addr_to_env(uint8_t *mac_addr_str,int index)
+{
+	char buf[ARP_HLEN_ASCII + 1] = {0};
+	char enetvar[32];
+	
+	sprintf(enetvar, index ? "eth%daddr" : "ethaddr", index);
+	if(is_hex_str(mac_addr_str,12)){
+		format_to_eth_addr_str(mac_addr_str,buf);
+		env_set(enetvar, buf);
+		printf("set %s env = [%s]\n",enetvar,buf);
+	}else {
+		printf("eth%d mac from eeprom is not hex str : [%s] \n",index,mac_addr_str);
+	}
+
+	return 0;
+}
+
+static int read_mac_from_eeprom(uint8_t i2c_bus, uint8_t addr)
+{
+	int ret;
+	unsigned char eth0_addr_str[13] = {0};
+	unsigned char eth1_addr_str[13] = {0};
+
+	ret = read_i2c_mac_addr(i2c_bus,addr,eth0_addr_str,eth1_addr_str);
+	if(ret < 0){
+		printf("read i2c mac addr error %d\n",ret);
+		return ret;
+	}
+	
+	set_mac_addr_to_env(eth0_addr_str,0);
+	set_mac_addr_to_env(eth1_addr_str,1);
+	return 0;
+}
+//end add by groot
+
 int board_late_init(void)
 {
 #ifdef CONFIG_ENV_IS_IN_MMC
@@ -551,6 +698,7 @@ int board_late_init(void)
 	env_set("board_name", "EVK");
 	env_set("board_rev", "iMX8MP");
 #endif
+	read_mac_from_eeprom(3,0x52); //add by groot  
 
 	return 0;
 }
