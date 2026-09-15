@@ -4,6 +4,8 @@
  * Written by Simon Glass <sjg@chromium.org>
  */
 
+//John_gao open debug
+//#define LOG_DEBUG
 #define LOG_CATEGORY UCLASS_BOOTSTD
 
 #include <bootdev.h>
@@ -16,6 +18,7 @@
 #include <serial.h>
 #include <dm/device-internal.h>
 #include <dm/uclass-internal.h>
+#include <mmc.h>
 
 /* error codes used to signal running out of things */
 enum {
@@ -355,6 +358,27 @@ static int bootflow_check(struct bootflow_iter *iter, struct bootflow *bflow)
 	}
 
 	dev = iter->dev;
+	// ===== 添加 MMC 设备过滤逻辑 =====
+        // 检查当前设备是否为 MMC 类型
+        enum uclass_id id = device_get_uclass_id(dev);
+	log_debug("uclass %d: %s\n", id, uclass_get_name(id));
+        if (id == UCLASS_MMC || id == UCLASS_BOOTDEV) {
+            // 获取当前 MMC 设备的 uclass 索引
+            int mmc_seq = dev_seq(dev);
+            // 获取环境变量中配置的 MMC 设备编号
+            int env_mmc_dev = mmc_get_env_dev();
+
+            // 如果不是目标 MMC 设备，跳过
+            if (mmc_seq != env_mmc_dev) {
+                log_debug("Bootdev '%s' SKIP: not target MMC (seq=%d, env=%d)\n",
+                          dev->name, mmc_seq, env_mmc_dev);
+                return log_msg_ret("emmc_no_scan",-ENODEV);  // 返回错误，让上层继续尝试下一个设备
+            }
+
+            log_debug("Bootdev '%s' ACCEPT: target MMC (seq=%d)\n",
+                      dev->name, mmc_seq);
+        }
+        // ===== 过滤逻辑结束 =====
 	ret = bootdev_get_bootflow(dev, iter, bflow);
 
 	/* If we got a valid bootflow, return it */

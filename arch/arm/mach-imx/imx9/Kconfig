@@ -86,6 +86,22 @@ config TARGET_IMX91_11X11_EVK
 	imply OF_UPSTREAM
 	imply BOOTSTD_FULL
 	imply BOOTSTD_BOOTCOMMAND
+	
+config TARGET_IMX91_DEBIX_BMB_13_A1
+	bool "imx91_debix_bmb_13_a1"
+	select OF_BOARD_FIXUP
+	select IMX91
+	imply OF_UPSTREAM
+	imply BOOTSTD_FULL
+	imply BOOTSTD_BOOTCOMMAND
+
+config TARGET_IMX91_DEBIX_BMB_13_A2
+	bool "imx91_debix_bmb_13_a2"
+	select OF_BOARD_FIXUP
+	select IMX91
+	imply OF_UPSTREAM
+	imply BOOTSTD_FULL
+	imply BOOTSTD_BOOTCOMMAND
 
 config TARGET_IMX93_9X9_QSB
 	bool "imx93_qsb"
@@ -138,6 +154,30 @@ config TARGET_IMX93_14X14_EVK
 
 config TARGET_IMX93_11X11_EVK
 	bool "imx93_11x11_evk"
+	select OF_BOARD_FIXUP
+	select IMX93
+	imply OF_UPSTREAM
+	imply BOOTSTD_FULL
+	imply BOOTSTD_BOOTCOMMAND
+	select CMD_REMOTEPROC
+	select REMOTEPROC_IMX
+	select REGMAP
+	select SYSCON
+
+config TARGET_IMX93_DEBIX_BMB_13_A1
+	bool "imx93_debix_bmb_13_a1"
+	select OF_BOARD_FIXUP
+	select IMX93
+	imply OF_UPSTREAM
+	imply BOOTSTD_FULL
+	imply BOOTSTD_BOOTCOMMAND
+	select CMD_REMOTEPROC
+	select REMOTEPROC_IMX
+	select REGMAP
+	select SYSCON
+
+config TARGET_IMX93_DEBIX_BMB_13_A2
+	bool "imx93_debix_bmb_13_a2"
 	select OF_BOARD_FIXUP
 	select IMX93
 	imply OF_UPSTREAM
@@ -266,6 +306,10 @@ source "board/toradex/verdin-imx95/Kconfig"
 source "board/freescale/imx94_evk/Kconfig"
 source "board/freescale/imx94_orangebox/Kconfig"
 source "board/polyhex/imx95_debix_emb_01/Kconfig"
+source "board/polyhex/imx91_debix_bmb_13_a1/Kconfig"
+source "board/polyhex/imx91_debix_bmb_13_a2/Kconfig"
+source "board/polyhex/imx93_debix_bmb_13_a1/Kconfig"
+source "board/polyhex/imx93_debix_bmb_13_a2/Kconfig"
 
 endif
 

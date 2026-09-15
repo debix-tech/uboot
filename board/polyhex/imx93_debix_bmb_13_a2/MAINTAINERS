@@ -1,0 +1,6 @@
+i.MX93 DEBIX BMB 13 A2 BOARD
+M:	John_gao <john_gao@polyhex.net>
+S:	Maintained
+F:	board/polyhex/imx93_debix_bmb_13_a2/
+F:	include/configs/imx93_debix_bmb_13_a2.h
+F:	configs/imx93_debix_bmb_13_a2_defconfig 
