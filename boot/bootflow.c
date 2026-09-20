@@ -19,6 +19,7 @@
 #include <dm/device-internal.h>
 #include <dm/uclass-internal.h>
 #include <mmc.h>
+#include <asm/arch/sys_proto.h>
 
 /* error codes used to signal running out of things */
 enum {
@@ -360,19 +361,21 @@ static int bootflow_check(struct bootflow_iter *iter, struct bootflow *bflow)
 	dev = iter->dev;
 	// ===== 添加 MMC 设备过滤逻辑 =====
         // 检查当前设备是否为 MMC 类型
-        enum uclass_id id = device_get_uclass_id(dev);
-	log_debug("uclass %d: %s\n", id, uclass_get_name(id));
-        if (id == UCLASS_MMC || id == UCLASS_BOOTDEV) {
+        //enum uclass_id id = device_get_uclass_id(dev);
+	//log_debug("uclass %d: %s UCLASS_BOOTDEV(%d)\n", id, uclass_get_name(id),UCLASS_BOOTDEV);
+       // if (id == UCLASS_MMC || id == UCLASS_BOOTDEV) {
+	   if (bootflow_iter_check_mmc(iter)==0){
             // 获取当前 MMC 设备的 uclass 索引
             int mmc_seq = dev_seq(dev);
+			if(is_imx8mp()) mmc_seq+=1;  // 8mp  sd=0  emmc=1 而 env_dev=  1 和 2 
             // 获取环境变量中配置的 MMC 设备编号
             int env_mmc_dev = mmc_get_env_dev();
-
+            log_debug(" mmc %d : %d \n", mmc_seq,env_mmc_dev);
             // 如果不是目标 MMC 设备，跳过
             if (mmc_seq != env_mmc_dev) {
                 log_debug("Bootdev '%s' SKIP: not target MMC (seq=%d, env=%d)\n",
                           dev->name, mmc_seq, env_mmc_dev);
-                return log_msg_ret("emmc_no_scan",-ENODEV);  // 返回错误，让上层继续尝试下一个设备
+                return log_msg_ret("check",-2);  // 返回错误，让上层继续尝试下一个设备
             }
 
             log_debug("Bootdev '%s' ACCEPT: target MMC (seq=%d)\n",
@@ -396,10 +399,12 @@ static int bootflow_check(struct bootflow_iter *iter, struct bootflow *bflow)
 		 * For 'all' we return all bootflows, even
 		 * those with errors
 		 */
-		if (iter->flags & BOOTFLOWIF_ALL)
+		if (iter->flags & BOOTFLOWIF_ALL){
+			log_debug(" ==== return all ret=%d \n", ret);
 			return log_msg_ret("all", ret);
+		}
 	}
-
+    log_debug(" ==== return check ret=%d \n", ret);
 	return log_msg_ret("check", ret);
 }
 
